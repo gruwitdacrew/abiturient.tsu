@@ -865,10 +865,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ProgramResponse"
-                  }
+                  "$ref": "#/components/schemas/ProgramsResponse"
                 }
               }
             }
@@ -1224,6 +1221,34 @@
           "name": {
             "type": "string",
             "example": "Высшая IT-школа"
+          }
+        }
+      },
+      "ProgramsResponse": {
+        "type": "object",
+        "properties": {
+          "programs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgramResponse"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "size": {
+                "type": "integer",
+                "example": 0
+              },
+              "count": {
+                "type": "integer",
+                "example": 0
+              },
+              "current": {
+                "type": "integer",
+                "example": 0
+              }
+            }
           }
         }
       },
