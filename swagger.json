@@ -112,6 +112,29 @@
         }
       }
     },
+    "/users/refresh": {
+      "post": {
+        "tags": [
+          "User Service"
+        ],
+        "summary": "Передать refresh token, чтобы получить новую пару refresh + access token",
+        "responses": {
+          "200": {
+            "description": "Успешная операция"
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users/register": {
       "post": {
         "tags": [
