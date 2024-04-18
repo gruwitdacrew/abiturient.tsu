@@ -36,8 +36,6 @@ namespace Application_Service.Services.Abiturient_Component
             Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
             if (accessToken == abiturient.accessToken)
             {
-
-
                 if (await _context.ApplicationPrograms.Where(p => p.id == userId).Where(p => p.programId == programId).ExecuteDeleteAsync() < 1)
                 {
                     return new NotFoundObjectResult(new ErrorResponse(404, "У вас нет добавленной программы с таким id"));

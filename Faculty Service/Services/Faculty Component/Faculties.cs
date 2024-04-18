@@ -71,11 +71,12 @@ namespace Faculty_Service.Services.Faculty_Component
 
         public async Task<IActionResult> Import()
         {
-            foreach (var entityType in _context.Model.GetEntityTypes())
-            {
-                var tableName = entityType.GetTableName();
-                await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tableName}");
-            }
+            _context.Programs.RemoveRange(_context.Programs);
+            _context.Faculties.RemoveRange(_context.Faculties);
+            _context.NextLevels.RemoveRange(_context.NextLevels);
+            _context.EducationDocumentTypes.RemoveRange(_context.EducationDocumentTypes);
+            _context.Levels.RemoveRange(_context.Levels);
+            await _context.SaveChangesAsync();
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "api/dictionary/education_levels");
             request.Headers.Add("Authorization", "Basic c3R1ZGVudDpueTZnUW55bjRlY2JCclA5bDFGeg==");
@@ -156,11 +157,6 @@ namespace Faculty_Service.Services.Faculty_Component
 
             await _context.SaveChangesAsync();
             return new OkObjectResult(string.Empty);
-        }
-
-        internal Task<IActionResult> GetPrograms(List<IOpenApiAny> faculty_name, string[] education_level, string education_form, string education_language, string program_name, int page_number, int page_size)
-        {
-            throw new NotImplementedException();
         }
     }
 }

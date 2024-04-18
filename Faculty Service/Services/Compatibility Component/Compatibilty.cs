@@ -14,12 +14,12 @@ namespace Faculty_Service.Services.Compatibility_Component
             _context = context;
         }
 
-        public async Task<IActionResult> CheckCompatibility(string userId, string accessToken, string programCode)
+        public async Task<IActionResult> CheckCompatibility(string userId, string accessToken, string programId)
         {
             Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
             if (accessToken == abiturient.accessToken)
             {
-                var nextLevelId = await _context.Programs.Where(x => x.code == programCode).Select(x => x.levelId).FirstOrDefaultAsync();
+                var nextLevelId = await _context.Programs.Where(x => x.id == programId).Select(x => x.levelId).FirstOrDefaultAsync();
 
                 var levelIds = await _context.NextLevels.Where(x => x.nextLevelId == nextLevelId).Select(x => x.levelId).ToListAsync();
 

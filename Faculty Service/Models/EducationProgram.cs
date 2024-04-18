@@ -6,7 +6,7 @@ namespace Faculty_Service.Models
     public class EducationProgram
     {
         [Key]
-        public string uuid { get; set; }
+        public string id { get; set; }
         public string facultyId { get; set; }
         public string code { get; set; }
         public string name { get; set; }
@@ -24,7 +24,7 @@ namespace Faculty_Service.Models
 
         public EducationProgram(EducationProgramRaw educationProgramRaw)
         {
-            this.uuid = Guid.NewGuid().ToString();
+            this.id = educationProgramRaw.id;
             this.facultyId = educationProgramRaw.faculty.id;
             this.code = educationProgramRaw.code;
             this.name = educationProgramRaw.name;

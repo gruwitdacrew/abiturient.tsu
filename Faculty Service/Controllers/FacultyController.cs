@@ -41,13 +41,13 @@ namespace Faculty_Service.Controllers
         [SwaggerResponse((int)HttpStatusCode.OK)]
         [SwaggerResponse((int)HttpStatusCode.BadRequest)]
         [SwaggerResponse((int)HttpStatusCode.Conflict)]
-        [Route("/api/faculty/programs/{program_code}/compatibility")]
-        public async Task<IActionResult> checkCompatibility([FromRoute] string program_code)
+        [Route("/api/faculty/programs/{programId}/compatibility")]
+        public async Task<IActionResult> checkCompatibility([FromRoute] string programId)
         {
             var userId = User.Claims.ToList()[0].Value;
             var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _compatibility.CheckCompatibility(userId, accessToken, program_code);
+            return await _compatibility.CheckCompatibility(userId, accessToken, programId);
         }
 
 
