@@ -9,25 +9,22 @@ namespace Application_Service.DBContext
         public DbSet<Abiturient> Abiturients { get; set; }
         public DbSet<EducationProgram> Programs { get; set; }
         public DbSet<Application> Applications { get; set; }
+        public DbSet<ApplicationProgram> ApplicationPrograms { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Abiturient>();
-            modelBuilder.Entity<Level>();
-            modelBuilder.Entity<NextLevel>(options =>
+            modelBuilder.Entity<EducationProgram>();
+            modelBuilder.Entity<Application>(options =>
             {
-                options.HasOne(p => p.level).WithMany(t => t.nextLevels).HasForeignKey(p => p.levelId);
-                //options.HasOne(p => p.nextLevel).WithMany(t => t.nextLevels).HasForeignKey(p => p.nextLevelId);
+                options.HasOne(p => p.abiturient).WithOne(p => p.application).HasForeignKey<Application>(p => p.id);
             });
-            modelBuilder.Entity<EducationDocumentType>(options =>
+            modelBuilder.Entity<ApplicationProgram>(options =>
             {
-                options.HasOne(p => p.level).WithMany(t => t.educationDocumentTypes).HasForeignKey(p => p.levelId);
-            });
-            modelBuilder.Entity<Faculty>();
-            modelBuilder.Entity<EducationProgram>(options =>
-            {
-                options.HasOne(p => p.faculty).WithMany(t => t.programs).HasForeignKey(p => p.facultyId);
+                options.HasOne(p => p.application).WithMany(p => p.applicationPrograms).HasForeignKey(p => p.id);
+
+                options.HasOne(p => p.educationProgram).WithMany(p => p.applicationPrograms).HasForeignKey(p => p.programId);
             });
         }
     }

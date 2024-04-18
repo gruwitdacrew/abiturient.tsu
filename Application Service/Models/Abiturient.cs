@@ -15,12 +15,14 @@ namespace Application_Service.Models
         public string nationality { get; set; }
         public string managerId { get; set; }
 
+        public Application application { get; set; } 
+
         public Abiturient()
         {
 
         }
 
-        public Abiturient(string id, string accessToken, User user)
+        public Abiturient(string id, string accessToken, User user, string managerId)
         {
             this.id = id;
             this.accessToken = accessToken;
@@ -29,6 +31,7 @@ namespace Application_Service.Models
             this.birthDate = user.birthDate;
             this.gender = user.gender;
             this.nationality = user.nationality;
+            this.managerId = managerId;
         }
     }
 }

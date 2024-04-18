@@ -8,6 +8,8 @@ namespace Application_Service.Models
         public string code { get; set; }
         public string name { get; set; }
 
+        public List<ApplicationProgram> applicationPrograms { get; set; }
+
         public EducationProgram()
         {
 

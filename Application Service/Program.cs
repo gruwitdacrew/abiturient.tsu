@@ -1,4 +1,13 @@
 
+using Application_Service.DBContext;
+using Application_Service.Services;
+using Application_Service.Services.Abiturient_Component;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Users_Service.Models;
+
 namespace Application_Service
 {
     public class Program
@@ -11,16 +20,11 @@ namespace Application_Service
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("FacultyDB")));
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("ApplicationDB")));
 
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.ParameterFilter<ParameterFilter>();
-
-            });
-            builder.Services.AddScoped<Compatibility>();
-            builder.Services.AddScoped<Faculties>();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<Abiturients>();
 
             AuthenticationConfiguration authenticationConfiguration = new AuthenticationConfiguration();
             builder.Configuration.Bind("Authentication", authenticationConfiguration);
