@@ -28,4 +28,16 @@ namespace Faculty_Service.Models
             this.levelId = educationDocumentTypeRaw.educationLevel.id;
         }
     }
+    class EducationDocumentTypeComparer : IEqualityComparer<EducationDocumentType>
+    {
+        public bool Equals(EducationDocumentType x, EducationDocumentType y)
+        {
+            return x.name == y.name && x.id == y.id && x.levelId == y.levelId;
+        }
+
+        public int GetHashCode(EducationDocumentType obj)
+        {
+            return obj.id.GetHashCode() ^ obj.name.GetHashCode() ^ obj.levelId.GetHashCode();
+        }
+    }
 }

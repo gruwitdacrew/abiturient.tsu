@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 
 namespace Faculty_Service.Services.Faculty_Component
@@ -68,16 +70,9 @@ namespace Faculty_Service.Services.Faculty_Component
 
             return new OkObjectResult(new ProgramsResponse(programs, new Pagination(page_size, count, page_current)));
         }
-
+         
         public async Task<IActionResult> Import()
         {
-            _context.Programs.RemoveRange(_context.Programs);
-            _context.Faculties.RemoveRange(_context.Faculties);
-            _context.NextLevels.RemoveRange(_context.NextLevels);
-            _context.EducationDocumentTypes.RemoveRange(_context.EducationDocumentTypes);
-            _context.Levels.RemoveRange(_context.Levels);
-            await _context.SaveChangesAsync();
-
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "api/dictionary/education_levels");
             request.Headers.Add("Authorization", "Basic c3R1ZGVudDpueTZnUW55bjRlY2JCclA5bDFGeg==");
 
@@ -86,8 +81,11 @@ namespace Faculty_Service.Services.Faculty_Component
             if (response.IsSuccessStatusCode)
             {
                 List<Level> levels = JsonConvert.DeserializeObject<List<Level>>(await response.Content.ReadAsStringAsync());
+                List<Level> levelsOld = await _context.Levels.ToListAsync();
 
-                await _context.Levels.AddRangeAsync(levels);
+                _context.Levels.RemoveRange(levelsOld.Except(levels, new LevelComparer()).ToList());
+                _context.Levels.AddRange(levels.Except(levelsOld, new LevelComparer()).ToList());
+
             }
             else return new UnauthorizedObjectResult(string.Empty);
 
@@ -113,8 +111,14 @@ namespace Faculty_Service.Services.Faculty_Component
                     }
                 }
 
-                await _context.EducationDocumentTypes.AddRangeAsync(documentTypes);
-                await _context.NextLevels.AddRangeAsync(nextLevels);
+                List<EducationDocumentType> documentTypesOld = await _context.EducationDocumentTypes.ToListAsync();
+                List<NextLevel> nextLevelsOld = await _context.NextLevels.ToListAsync();
+
+                _context.EducationDocumentTypes.RemoveRange(documentTypesOld.Except(documentTypes, new EducationDocumentTypeComparer()));
+                _context.EducationDocumentTypes.AddRange(documentTypes.Except(documentTypesOld, new EducationDocumentTypeComparer()));
+
+                _context.NextLevels.RemoveRange(nextLevelsOld.Except(nextLevels, new NextLevelComparer()));
+                _context.NextLevels.AddRange(nextLevels.Except(nextLevelsOld, new NextLevelComparer()));
 
             }
             else return new UnauthorizedObjectResult(string.Empty);
@@ -129,7 +133,10 @@ namespace Faculty_Service.Services.Faculty_Component
             if (response.IsSuccessStatusCode)
             {
                 List<Faculty> faculties = JsonConvert.DeserializeObject<List<Faculty>>(await response.Content.ReadAsStringAsync());
-                await _context.Faculties.AddRangeAsync(faculties);
+                List<Faculty> facultiesOld = await _context.Faculties.ToListAsync();
+
+                _context.Faculties.RemoveRange(facultiesOld.Except(faculties, new FacultyComparer()));
+                _context.Faculties.AddRange(faculties.Except(facultiesOld, new FacultyComparer()));
             }
             else return new UnauthorizedObjectResult(string.Empty);
 
@@ -149,11 +156,13 @@ namespace Faculty_Service.Services.Faculty_Component
                 {
                     programs.Add(new EducationProgram(programRaw));
                 }
-                await _context.Programs.AddRangeAsync(programs);
+
+                List<EducationProgram> programsOld = await _context.Programs.ToListAsync();
+
+                _context.Programs.RemoveRange(programsOld.Except(programs, new EducationProgramComparer()));
+                _context.Programs.AddRange(programs.Except(programsOld, new EducationProgramComparer()));
             }
             else return new UnauthorizedObjectResult(string.Empty);
-
-
 
             await _context.SaveChangesAsync();
             return new OkObjectResult(string.Empty);

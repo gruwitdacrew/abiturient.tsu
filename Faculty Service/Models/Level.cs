@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace Faculty_Service.Models
 {
     public class Level
@@ -19,6 +21,19 @@ namespace Faculty_Service.Models
         {
             this.id = id;
             this.name = name;
+        }
+    }
+
+    class LevelComparer : IEqualityComparer<Level>
+    {
+        public bool Equals(Level x, Level y)
+        {
+            return x.name == y.name && x.id == y.id;
+        }
+
+        public int GetHashCode(Level obj)
+        {
+            return obj.id.GetHashCode() ^ obj.name.GetHashCode();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Faculty_Service.Models
 {
@@ -32,5 +33,34 @@ namespace Faculty_Service.Models
             this.educationForm = educationProgramRaw.educationForm;
             this.levelId = educationProgramRaw.educationLevel.id;
         }
+    }
+
+    class EducationProgramComparer : IEqualityComparer<EducationProgram>
+    {
+        public bool Equals(EducationProgram x, EducationProgram y)
+        {
+            return x.id == y.id &&
+                   x.facultyId == y.facultyId &&
+                   x.code == y.code &&
+                   x.name == y.name && 
+                   x.language == y.language && 
+                   x.educationForm == y.educationForm && 
+                   x.levelId == y.levelId;
+        }
+        public int GetHashCode([DisallowNull] EducationProgram obj)
+        {
+            return obj.id.GetHashCode() ^
+                   obj.facultyId.GetHashCode() ^
+                   obj.code.GetHashCode() ^
+                   obj.name.GetHashCode() ^
+                   obj.language.GetHashCode() ^
+                   obj.educationForm.GetHashCode() ^
+                   obj.levelId.GetHashCode();
+        }
+
+        //public int GetHashCode(EducationProgram obj)
+        //{
+        //    return obj.id.GetHashCode() ^ obj.name.GetHashCode();
+        //}
     }
 }

@@ -19,4 +19,16 @@ namespace Faculty_Service.Models
             this.name = name;
         }
     }
+    class FacultyComparer : IEqualityComparer<Faculty>
+    {
+        public bool Equals(Faculty x, Faculty y)
+        {
+            return x.name == y.name && x.id == y.id;
+        }
+
+        public int GetHashCode(Faculty obj)
+        {
+            return obj.id.GetHashCode() ^ obj.name.GetHashCode();
+        }
+    }
 }

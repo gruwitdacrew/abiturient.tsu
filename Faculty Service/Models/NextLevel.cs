@@ -25,4 +25,16 @@ namespace Faculty_Service.Models
             this.nextLevelId = nextLevelId;
         }
     }
+    class NextLevelComparer : IEqualityComparer<NextLevel>
+    {
+        public bool Equals(NextLevel x, NextLevel y)
+        {
+            return x.levelId == y.levelId && x.nextLevelId == y.nextLevelId;
+        }
+
+        public int GetHashCode(NextLevel obj)
+        {
+            return obj.levelId.GetHashCode() ^ obj.nextLevelId.GetHashCode();
+        }
+    }
 }
