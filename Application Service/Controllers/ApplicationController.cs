@@ -28,7 +28,7 @@ namespace Application_Service.Controllers
             var userId = User.Claims.ToList()[0].Value;
             var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _abiturientService.AddProgram(userId, accessToken, programId);
+            return await _abiturientService.AddProgram(userId, programId);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -42,7 +42,7 @@ namespace Application_Service.Controllers
             var userId = User.Claims.ToList()[0].Value;
             var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _abiturientService.DeleteProgram(userId, accessToken, programId);
+            return await _abiturientService.DeleteProgram(userId, programId);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -56,7 +56,7 @@ namespace Application_Service.Controllers
             var userId = User.Claims.ToList()[0].Value;
             var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _abiturientService.ChangeProgramPriority(userId, accessToken, programId, priority);
+            return await _abiturientService.ChangeProgramPriority(userId, programId, priority);
         }
     }
 }

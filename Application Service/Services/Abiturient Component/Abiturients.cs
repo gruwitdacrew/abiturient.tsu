@@ -13,67 +13,52 @@ namespace Application_Service.Services.Abiturient_Component
             _context = context;
         }
 
-        public async Task<IActionResult> AddProgram(string userId, string accessToken, string programId)
+        public async Task<IActionResult> AddProgram(string userId, string programId)
         {
-            Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
-            if (accessToken == abiturient.accessToken)
-            {
-                int count = await _context.ApplicationPrograms.Where(p => p.id == userId).CountAsync();
-                if (count >= Application.applicationProgramsQuantity) return new ConflictObjectResult(new ErrorResponse(409, $"Вы не можете добавить больше {Application.applicationProgramsQuantity} программ"));
-                if (await _context.Programs.Where(p => p.id == programId).FirstOrDefaultAsync() == null) return new NotFoundObjectResult(new ErrorResponse(404, "Программы с таким id не существует"));
-                if (await _context.ApplicationPrograms.Where(p => p.id == userId).Where(p => p.programId == programId).FirstOrDefaultAsync() != null) return new ConflictObjectResult(new ErrorResponse(409, "У вас уже добавлена эта программа"));
-                
-                await _context.ApplicationPrograms.AddAsync(new ApplicationProgram(abiturient.id, programId, count + 1));
-                await _context.SaveChangesAsync();
+            int count = await _context.ApplicationPrograms.Where(p => p.id == userId).CountAsync();
+            if (count >= Application.applicationProgramsQuantity) return new ConflictObjectResult(new ErrorResponse(409, $"Вы не можете добавить больше {Application.applicationProgramsQuantity} программ"));
+            if (await _context.Programs.Where(p => p.id == programId).FirstOrDefaultAsync() == null) return new NotFoundObjectResult(new ErrorResponse(404, "Программы с таким id не существует"));
+            if (await _context.ApplicationPrograms.Where(p => p.id == userId).Where(p => p.programId == programId).FirstOrDefaultAsync() != null) return new ConflictObjectResult(new ErrorResponse(409, "У вас уже добавлена эта программа"));
 
-                return new OkObjectResult(string.Empty);
-            }
-            else return new UnauthorizedObjectResult(string.Empty);
+            await _context.ApplicationPrograms.AddAsync(new ApplicationProgram(userId, programId, count + 1));
+            await _context.SaveChangesAsync();
+
+            return new OkObjectResult(string.Empty);
         }
 
-        public async Task<IActionResult> DeleteProgram(string userId, string accessToken, string programId)
+        public async Task<IActionResult> DeleteProgram(string userId, string programId)
         {
-            Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
-            if (accessToken == abiturient.accessToken)
+            if (await _context.ApplicationPrograms.Where(p => p.id == userId).Where(p => p.programId == programId).ExecuteDeleteAsync() < 1)
             {
-                if (await _context.ApplicationPrograms.Where(p => p.id == userId).Where(p => p.programId == programId).ExecuteDeleteAsync() < 1)
-                {
-                    return new NotFoundObjectResult(new ErrorResponse(404, "У вас нет добавленной программы с таким id"));
-                }
-                await _context.SaveChangesAsync();
-
-                return new OkObjectResult(string.Empty);
+                return new NotFoundObjectResult(new ErrorResponse(404, "У вас нет добавленной программы с таким id"));
             }
-            else return new UnauthorizedObjectResult(string.Empty);
+            await _context.SaveChangesAsync();
+
+            return new OkObjectResult(string.Empty);
         }
 
-        public async Task<IActionResult> ChangeProgramPriority(string userId, string accessToken, string programId, int priority)
+        public async Task<IActionResult> ChangeProgramPriority(string userId, string programId, int priority)
         {
-            Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
-            if (accessToken == abiturient.accessToken)
+            List<ApplicationProgram> programs = await _context.ApplicationPrograms.Where(p => p.id == userId).OrderBy(p => p.priority).ToListAsync();
+            if (programs.Where(p => p.programId == programId).FirstOrDefault() == null)
             {
-                List<ApplicationProgram> programs = await _context.ApplicationPrograms.Where(p => p.id == userId).OrderBy(p => p.priority).ToListAsync();
-                if (programs.Where(p => p.programId == programId).FirstOrDefault() == null)
-                {
-                    return new NotFoundObjectResult(new ErrorResponse(404, "У вас нет добавленной программы с таким id"));
-                }
-
-                ApplicationProgram program = programs.Where(p => p.programId == programId).FirstOrDefault();
-
-                programs.Remove(program);
-                programs.Insert(priority, program);
-
-                for (int i = 0; i < programs.Count; i++)
-                {
-                    programs[i].priority = i + 1;
-                }
-
-                _context.ApplicationPrograms.UpdateRange(programs);
-                await _context.SaveChangesAsync();
-
-                return new OkObjectResult(string.Empty);
+                return new NotFoundObjectResult(new ErrorResponse(404, "У вас нет добавленной программы с таким id"));
             }
-            else return new UnauthorizedObjectResult(string.Empty);
+
+            ApplicationProgram program = programs.Where(p => p.programId == programId).FirstOrDefault();
+
+            programs.Remove(program);
+            programs.Insert(priority, program);
+
+            for (int i = 0; i < programs.Count; i++)
+            {
+                programs[i].priority = i + 1;
+            }
+
+            _context.ApplicationPrograms.UpdateRange(programs);
+            await _context.SaveChangesAsync();
+
+            return new OkObjectResult(string.Empty);
         }
     }
 }

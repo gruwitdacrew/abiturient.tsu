@@ -6,7 +6,6 @@ namespace Application_Service.Models
     public class Abiturient
     {
         public string id { get; set; }
-        public string accessToken { get; set; }
         public string email { get; set; }
         public string phone { get; set; }
         public string fullName { get; set; }
@@ -22,10 +21,9 @@ namespace Application_Service.Models
 
         }
 
-        public Abiturient(string id, string accessToken, User user, string managerId)
+        public Abiturient(string id, User user, string managerId)
         {
             this.id = id;
-            this.accessToken = accessToken;
             this.email = user.Email;
             this.phone = user.PhoneNumber;
             this.birthDate = user.birthDate;

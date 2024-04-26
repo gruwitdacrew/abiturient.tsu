@@ -40,9 +40,8 @@ namespace Document_Service.Controllers
             //    return new BadRequestObjectResult(new ErrorResponse(400, ex.Message));
             //}
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _educationService.AddEducationDocument(userId, accessToken, educationDocument);
+            return await _educationService.AddEducationDocument(userId, educationDocument);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -54,9 +53,8 @@ namespace Document_Service.Controllers
         public async Task<ActionResult<EducationDocumentResponse>> getEducationDocument()
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _educationService.GetEducationDocument(userId, accessToken);
+            return await _educationService.GetEducationDocument(userId);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -76,9 +74,8 @@ namespace Document_Service.Controllers
             //    return new BadRequestObjectResult(new ErrorResponse(400, ex.Message));
             //}
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _educationService.EditEducationDocument(userId, accessToken, educationDocument);
+            return await _educationService.EditEducationDocument(userId, educationDocument);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -90,9 +87,8 @@ namespace Document_Service.Controllers
         public async Task<IActionResult> deleteEducationDocument()
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _educationService.DeleteEducationDocument(userId, accessToken);
+            return await _educationService.DeleteEducationDocument(userId);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -112,9 +108,8 @@ namespace Document_Service.Controllers
             //    return new BadRequestObjectResult(new ErrorResponse(400, ex.Message));
             //}
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _passportService.AddPassportDocument(userId, accessToken, passportDocumentRequest);
+            return await _passportService.AddPassportDocument(userId, passportDocumentRequest);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -126,9 +121,8 @@ namespace Document_Service.Controllers
         public async Task<ActionResult<PassportDocumentResponse>> getPassportDocument()
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _passportService.GetPassportDocument(userId, accessToken);
+            return await _passportService.GetPassportDocument(userId);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -148,9 +142,8 @@ namespace Document_Service.Controllers
             //    return new BadRequestObjectResult(new ErrorResponse(400, ex.Message));
             //}
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _passportService.EditPassportDocument(userId, accessToken, passportDocument);
+            return await _passportService.EditPassportDocument(userId, passportDocument);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -162,9 +155,8 @@ namespace Document_Service.Controllers
         public async Task<IActionResult> deletePassportDocument()
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _passportService.DeletePassportDocument(userId, accessToken);
+            return await _passportService.DeletePassportDocument(userId);
         }
 
 
@@ -185,9 +177,8 @@ namespace Document_Service.Controllers
         public async Task<IActionResult> uploadScanFile([FromRoute] Document_type document_type, IFormFile file)
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _scanService.UploadScanFile(userId, accessToken, document_type.ToString(), file);
+            return await _scanService.UploadScanFile(userId, document_type.ToString(), file);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -199,9 +190,8 @@ namespace Document_Service.Controllers
         public async Task<IActionResult> getScanFile([FromRoute] Document_type document_type)
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _scanService.GetScanFile(userId, accessToken, document_type.ToString());
+            return await _scanService.GetScanFile(userId, document_type.ToString());
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -213,9 +203,8 @@ namespace Document_Service.Controllers
         public async Task<IActionResult> deleteScanFile([FromRoute] Document_type document_type)
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _scanService.DeleteScanFile(userId, accessToken, document_type.ToString());
+            return await _scanService.DeleteScanFile(userId, document_type.ToString());
         }
     }
 }

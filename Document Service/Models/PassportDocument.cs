@@ -9,15 +9,14 @@ namespace Document_Service.Models
         public string date { get; set; }
         public byte[]? scan { get; set; }
 
-        public Abiturient abiturient { get; set; }
 
         public PassportDocument()
         {
 
         }
-        public PassportDocument(Abiturient abiturient, PassportDocumentRequest passportDocumentRequest)
+        public PassportDocument(string userId, PassportDocumentRequest passportDocumentRequest)
         {
-            this.id = abiturient.id;
+            this.id = userId;
             this.series = passportDocumentRequest.series;
             this.number = passportDocumentRequest.number;
             this.date = passportDocumentRequest.date;

@@ -6,7 +6,6 @@ namespace Faculty_Service.DBContext
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-        public DbSet<Abiturient> Abiturients { get; set; }
         public DbSet<Level> Levels { get; set; }
         public DbSet<NextLevel> NextLevels { get; set; }
         public DbSet<EducationDocumentType> EducationDocumentTypes { get; set; }
@@ -16,7 +15,6 @@ namespace Faculty_Service.DBContext
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Abiturient>();
             modelBuilder.Entity<Level>();
             modelBuilder.Entity<NextLevel>(options =>
             {

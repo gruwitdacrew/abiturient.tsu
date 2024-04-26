@@ -13,83 +13,63 @@ namespace Document_Service.Services
             _context = context;
         }
 
-        public async Task<IActionResult> AddPassportDocument(string userId, string accessToken, PassportDocumentRequest passportDocumentRequest)
+        public async Task<IActionResult> AddPassportDocument(string userId, PassportDocumentRequest passportDocumentRequest)
         {
-            Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
-            if (accessToken == abiturient.accessToken)
-            {
-                if (await _context.Passports.Where(p => p.id == abiturient.id).FirstOrDefaultAsync() != null) return new ConflictObjectResult(new ErrorResponse(409, "У вас уже указан паспорт"));
+            if (await _context.Passports.Where(p => p.id == userId).FirstOrDefaultAsync() != null) return new ConflictObjectResult(new ErrorResponse(409, "У вас уже указан паспорт"));
 
-                await _context.Passports.AddAsync(new PassportDocument(abiturient, passportDocumentRequest));
-                await _context.SaveChangesAsync();
+            await _context.Passports.AddAsync(new PassportDocument(userId, passportDocumentRequest));
+            await _context.SaveChangesAsync();
 
-                return new OkObjectResult(string.Empty);
-            }
-            else return new UnauthorizedObjectResult(string.Empty);
+            return new OkObjectResult(string.Empty);
         }
 
-        public async Task<ActionResult<PassportDocumentResponse>> GetPassportDocument(string userId, string accessToken)
+        public async Task<ActionResult<PassportDocumentResponse>> GetPassportDocument(string userId)
         {
-            Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
-            if (accessToken == abiturient.accessToken)
-            {
-                PassportDocument passportDocument = await _context.Passports.Where(p => p.id == abiturient.id).FirstOrDefaultAsync();
+            PassportDocument passportDocument = await _context.Passports.Where(p => p.id == userId).FirstOrDefaultAsync();
 
-                if (passportDocument == null) return new NotFoundObjectResult(new ErrorResponse(404, "Вы не указывали паспорт"));
+            if (passportDocument == null) return new NotFoundObjectResult(new ErrorResponse(404, "Вы не указывали паспорт"));
 
-                return new OkObjectResult(new PassportDocumentResponse(passportDocument));
-            }
-            else return new UnauthorizedObjectResult(string.Empty);
+            return new OkObjectResult(new PassportDocumentResponse(passportDocument));
         }
 
-        public async Task<IActionResult> EditPassportDocument(string userId, string accessToken, PassportDocumentRequest passportDocumentRequest)
+        public async Task<IActionResult> EditPassportDocument(string userId, PassportDocumentRequest passportDocumentRequest)
         {
-            Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
-            if (accessToken == abiturient.accessToken)
+            PassportDocument passportDocument = await _context.Passports.Where(p => p.id == userId).FirstOrDefaultAsync();
+
+            if (passportDocument == null) return new NotFoundObjectResult(new ErrorResponse(404, "Вы не указывали паспорт"));
+
+            if (passportDocumentRequest.number != null)
             {
-                PassportDocument passportDocument = await _context.Passports.Where(p => p.id == abiturient.id).FirstOrDefaultAsync();
-
-                if (passportDocument == null) return new NotFoundObjectResult(new ErrorResponse(404, "Вы не указывали паспорт"));
-
-                if (passportDocumentRequest.number != null)
-                {
-                    passportDocument.number = passportDocumentRequest.number;
-                }
-                if (passportDocumentRequest.series != null)
-                {
-                    passportDocument.series = passportDocumentRequest.series;
-                }
-                if (passportDocumentRequest.date != null)
-                {
-                    passportDocument.date = passportDocumentRequest.date;
-                }
-                if (passportDocumentRequest.date != null)
-                {
-                    passportDocument.date = passportDocumentRequest.date;
-                }
-
-                _context.Passports.Update(passportDocument);
-                await _context.SaveChangesAsync();
-
-                return new OkObjectResult(string.Empty);
+                passportDocument.number = passportDocumentRequest.number;
             }
-            else return new UnauthorizedObjectResult(string.Empty);
+            if (passportDocumentRequest.series != null)
+            {
+                passportDocument.series = passportDocumentRequest.series;
+            }
+            if (passportDocumentRequest.date != null)
+            {
+                passportDocument.date = passportDocumentRequest.date;
+            }
+            if (passportDocumentRequest.date != null)
+            {
+                passportDocument.date = passportDocumentRequest.date;
+            }
+
+            _context.Passports.Update(passportDocument);
+            await _context.SaveChangesAsync();
+
+            return new OkObjectResult(string.Empty);
         }
 
-        public async Task<IActionResult> DeletePassportDocument(string userId, string accessToken)
+        public async Task<IActionResult> DeletePassportDocument(string userId)
         {
-            Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
-            if (accessToken == abiturient.accessToken)
-            {
-                PassportDocument passportDocument = await _context.Passports.Where(p => p.id == abiturient.id).FirstOrDefaultAsync();
+            PassportDocument passportDocument = await _context.Passports.Where(p => p.id == userId).FirstOrDefaultAsync();
 
-                if (passportDocument == null) return new NotFoundObjectResult(new ErrorResponse(404, "Вы не указывали паспорт"));
+            if (passportDocument == null) return new NotFoundObjectResult(new ErrorResponse(404, "Вы не указывали паспорт"));
 
-                await _context.Passports.Where(p => p.id == passportDocument.id).ExecuteDeleteAsync();
+            await _context.Passports.Where(p => p.id == passportDocument.id).ExecuteDeleteAsync();
 
-                return new OkObjectResult(string.Empty);
-            }
-            else return new UnauthorizedObjectResult(string.Empty);
+            return new OkObjectResult(string.Empty);
         }
 
     }

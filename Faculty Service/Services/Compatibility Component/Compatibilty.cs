@@ -14,24 +14,19 @@ namespace Faculty_Service.Services.Compatibility_Component
             _context = context;
         }
 
-        public async Task<IActionResult> CheckCompatibility(string userId, string accessToken, string programId)
+        public async Task<IActionResult> CheckCompatibility(string userId, string programId)
         {
-            Abiturient abiturient = await _context.Abiturients.Where(p => p.id == userId).FirstOrDefaultAsync();
-            if (accessToken == abiturient.accessToken)
+            var nextLevelId = await _context.Programs.Where(x => x.id == programId).Select(x => x.levelId).FirstOrDefaultAsync();
+
+            var levelIds = await _context.NextLevels.Where(x => x.nextLevelId == nextLevelId).Select(x => x.levelId).ToListAsync();
+
+            var documentTypes = await _context.EducationDocumentTypes.Where(x => levelIds.Contains(x.levelId)).Select(x => x.name).ToListAsync();
+
+            using (var bus = RabbitHutch.CreateBus("host=localhost"))
             {
-                var nextLevelId = await _context.Programs.Where(x => x.id == programId).Select(x => x.levelId).FirstOrDefaultAsync();
-
-                var levelIds = await _context.NextLevels.Where(x => x.nextLevelId == nextLevelId).Select(x => x.levelId).ToListAsync();
-
-                var documentTypes = await _context.EducationDocumentTypes.Where(x => levelIds.Contains(x.levelId)).Select(x => x.name).ToListAsync();
-
-                using (var bus = RabbitHutch.CreateBus("host=localhost"))
-                {
-                    bool response = await bus.Rpc.RequestAsync<CompatibilityCheckRequest, bool>(new CompatibilityCheckRequest(userId, documentTypes));
-                    return new OkObjectResult(response);
-                }
+                bool response = await bus.Rpc.RequestAsync<CompatibilityCheckRequest, bool>(new CompatibilityCheckRequest(userId, documentTypes));
+                return new OkObjectResult(response);
             }
-            return new UnauthorizedObjectResult(string.Empty);
         }
     }
 }

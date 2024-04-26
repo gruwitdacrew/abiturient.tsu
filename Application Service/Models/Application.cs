@@ -13,8 +13,8 @@ namespace Application_Service.Models
         public string date_edu { get; set; }
         public string grade { get; set; }
 
-        
-        public static int applicationProgramsQuantity { get; set; }
+
+        public static int applicationProgramsQuantity = 3;
         public Abiturient abiturient { get; set; }
         public List<ApplicationProgram> applicationPrograms { get; set; }
 
