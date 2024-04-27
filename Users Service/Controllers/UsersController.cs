@@ -47,15 +47,17 @@ namespace Users_Service.Controllers
             return await _usersService.LoginUser(loginRequest);
         }
 
+        [Authorize]
         [HttpPost]
         [SwaggerResponse((int)HttpStatusCode.OK)]
         [SwaggerResponse((int)HttpStatusCode.Forbidden)]
         [SwaggerResponse((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<TokenResponse>> refresh()
         {
-            var token = Request.Headers.Authorization.ToString().Substring(7);
+            var userId = User.Claims.ToList()[0].Value;
+            var refreshToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _usersService.Refresh(token);
+            return await _usersService.Refresh(userId, refreshToken);
         }
 
         [Authorize]
@@ -66,9 +68,8 @@ namespace Users_Service.Controllers
         public async Task<IActionResult> logout()
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _usersService.LogoutUser(userId, accessToken);
+            return await _usersService.LogoutUser(userId);
         }
 
         [Authorize(Roles = "Абитуриент")]
@@ -79,9 +80,8 @@ namespace Users_Service.Controllers
         public async Task<ActionResult<UserProfileResponse>> profile()
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
-            return await _usersService.GetUserProfile(userId, accessToken);
+            return await _usersService.GetUserProfile(userId);
         }
 
         [Authorize]
@@ -92,7 +92,6 @@ namespace Users_Service.Controllers
         public async Task<IActionResult> profile([FromBody] EditUserRequest editRequest)
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
             try
             {
@@ -102,7 +101,7 @@ namespace Users_Service.Controllers
             {
                 return new BadRequestObjectResult(new ErrorResponse(400, ex.Message));
             }
-            return await _usersService.EditUser(userId, editRequest, accessToken);
+            return await _usersService.EditUser(userId, editRequest);
         }
 
         [Authorize]
@@ -114,7 +113,6 @@ namespace Users_Service.Controllers
         public async Task<IActionResult> setNewPassword([FromBody] ChangePasswordRequest changePasswordRequest)
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
             try
             {
@@ -124,7 +122,7 @@ namespace Users_Service.Controllers
             {
                 return new BadRequestObjectResult(new ErrorResponse(400, ex.Message));
             }
-            return await _usersService.SetNewPassword(userId, accessToken, changePasswordRequest);
+            return await _usersService.SetNewPassword(userId, changePasswordRequest);
 
         }
     }

@@ -26,7 +26,6 @@ namespace Application_Service.Controllers
         public async Task<IActionResult> addProgram([FromRoute] string programId)
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
             return await _abiturientService.AddProgram(userId, programId);
         }
@@ -40,7 +39,6 @@ namespace Application_Service.Controllers
         public async Task<IActionResult> deleteProgram([FromRoute] string programId)
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
             return await _abiturientService.DeleteProgram(userId, programId);
         }
@@ -54,7 +52,6 @@ namespace Application_Service.Controllers
         public async Task<IActionResult> changeProgramPriority([FromRoute] string programId, int priority)
         {
             var userId = User.Claims.ToList()[0].Value;
-            var accessToken = HttpContext.Request.Headers.Authorization.ToString().Substring(7);
 
             return await _abiturientService.ChangeProgramPriority(userId, programId, priority);
         }

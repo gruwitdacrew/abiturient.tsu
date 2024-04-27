@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Users_Service.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using EasyNetQ;
 using Notification_Service.Models;
 using Users_Service.DBContext;
@@ -11,17 +10,15 @@ namespace Users_Service.Services
 {
     public class Users
     {
-        private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly TokenGenerator _accessTokenGenerator;
+        private readonly TokenGenerator _tokenGenerator;
 
-        public Users(AppDbContext context,
-            TokenGenerator accessTokenGenerator,
+        public Users(
+            TokenGenerator tokenGenerator,
             UserManager<User> userManager
             )
         {
-            _context = context;
-            _accessTokenGenerator = accessTokenGenerator;
+            _tokenGenerator = tokenGenerator;
             _userManager = userManager;
         }
 
@@ -46,16 +43,13 @@ namespace Users_Service.Services
 
             await _userManager.AddToRoleAsync(user, "ABITURIENT");
 
-            var refreshToken = await _userManager.GenerateUserTokenAsync(user, "Abiturient.tsu", "RefreshToken");
+            var refreshToken = await _tokenGenerator.GenerateRefreshToken(user);
             await _userManager.SetAuthenticationTokenAsync(user, "Abiturient.tsu", "RefreshToken", refreshToken);
 
-            string accessToken = _accessTokenGenerator.GenerateAccessToken(user, (List<string>)await _userManager.GetRolesAsync(user));
-            await _userManager.SetAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken", accessToken);
+            string accessToken = await _tokenGenerator.GenerateAccessToken(user, (List<string>)await _userManager.GetRolesAsync(user));
 
             var rabbit = RabbitHutch.CreateBus("host=localhost");
-            await rabbit.PubSub.PublishAsync(new TokenMessage(user.Id.ToString(), accessToken));
-
-            Console.WriteLine("Send Mesage");
+            await rabbit.PubSub.PublishAsync(user);
 
             return new OkObjectResult(new TokenResponse(refreshToken, accessToken));
         }
@@ -71,16 +65,11 @@ namespace Users_Service.Services
             else if (await _userManager.CheckPasswordAsync(user, loginRequest.password))
             {
                 await _userManager.RemoveAuthenticationTokenAsync(user, "Abiturient.tsu", "RefreshToken");
-                await _userManager.RemoveAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken");
 
-                var refreshToken = await _userManager.GenerateUserTokenAsync(user, "Abiturient.tsu", "RefreshToken");
+                var refreshToken = await _tokenGenerator.GenerateRefreshToken(user);
                 await _userManager.SetAuthenticationTokenAsync(user, "Abiturient.tsu", "RefreshToken", refreshToken);
 
-                string accessToken = _accessTokenGenerator.GenerateAccessToken(user, (List<string>)await _userManager.GetRolesAsync(user));
-                await _userManager.SetAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken", accessToken);
-
-                var rabbit = RabbitHutch.CreateBus("host=localhost");
-                await rabbit.PubSub.PublishAsync(new TokenMessage(user.Id.ToString(), accessToken));
+                string accessToken = await _tokenGenerator.GenerateAccessToken(user, (List<string>)await _userManager.GetRolesAsync(user));
 
                 return new OkObjectResult(new TokenResponse(refreshToken, accessToken));
             }
@@ -90,136 +79,108 @@ namespace Users_Service.Services
             }
         }
 
-        public async Task<IActionResult> LogoutUser(string userId, string accessToken)
+        public async Task<IActionResult> LogoutUser(string userId)
         {
             User user = await _userManager.FindByIdAsync(userId);
 
+            await _userManager.RemoveAuthenticationTokenAsync(user, "Abiturient.tsu", "RefreshToken");
 
-            if (accessToken == await _userManager.GetAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken"))
-            {
-                await _userManager.RemoveAuthenticationTokenAsync(user, "Abiturient.tsu", "RefreshToken");
-                await _userManager.RemoveAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken");
-
-                var rabbit = RabbitHutch.CreateBus("host=localhost");
-                await rabbit.PubSub.PublishAsync(user.Id.ToString());
-
-                return new OkObjectResult("");
-            }
-            else return new UnauthorizedObjectResult(new ErrorResponse(401, "Неподходящий access token"));
+            return new OkObjectResult("");
         }
 
-        public async Task<ActionResult<TokenResponse>> Refresh(string refreshToken)
+        public async Task<ActionResult<TokenResponse>> Refresh(string userId, string refreshToken)
         {
-            User user = await _userManager.FindByIdAsync((await _context.UserTokens.Where(x => x.Name == "RefreshToken" && x.Value == refreshToken).Select(x => x.UserId).FirstOrDefaultAsync()).ToString());
+            User user = await _userManager.FindByIdAsync(userId);
 
-            if (user!=null)
+            if (refreshToken == await _userManager.GetAuthenticationTokenAsync(user, "Abiturient.tsu", "RefreshToken"))
             {
                 await _userManager.RemoveAuthenticationTokenAsync(user, "Abiturient.tsu", "RefreshToken");
-                await _userManager.RemoveAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken");
 
-                var newRefreshToken = await _userManager.GenerateUserTokenAsync(user, "Abiturient.tsu", "RefreshToken");
+                var newRefreshToken = await _tokenGenerator.GenerateRefreshToken(user);
                 await _userManager.SetAuthenticationTokenAsync(user, "Abiturient.tsu", "RefreshToken", newRefreshToken);
 
-                string accessToken = _accessTokenGenerator.GenerateAccessToken(user, (List<string>)await _userManager.GetRolesAsync(user));
-                await _userManager.SetAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken", accessToken);
-
-                var rabbit = RabbitHutch.CreateBus("host=localhost");
-                await rabbit.PubSub.PublishAsync(new TokenMessage(user.Id.ToString(), accessToken));
+                string accessToken = await _tokenGenerator.GenerateAccessToken(user, (List<string>)await _userManager.GetRolesAsync(user));
 
                 return new OkObjectResult(new TokenResponse(newRefreshToken, accessToken));
             }
             else return new UnauthorizedObjectResult(new ErrorResponse(401, "Неподходящий refresh token"));
         }
-        public async Task<ActionResult<UserProfileResponse>> GetUserProfile(string userId, string accessToken)
+        public async Task<ActionResult<UserProfileResponse>> GetUserProfile(string userId)
         {
             User user = await _userManager.FindByIdAsync(userId);
-            if (accessToken == await _userManager.GetAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken"))
-            {
-                return new OkObjectResult(new UserProfileResponse(user, (List<string>)await _userManager.GetRolesAsync(user)));
-            }
-            else return new UnauthorizedObjectResult("");
+
+            return new OkObjectResult(new UserProfileResponse(user, (List<string>)await _userManager.GetRolesAsync(user)));
         }
 
 
-        public async Task<IActionResult> EditUser(string userId, EditUserRequest editUserRequest, string accessToken)
+        public async Task<IActionResult> EditUser(string userId, EditUserRequest editUserRequest)
         {
             User user = await _userManager.FindByIdAsync(userId);
 
-            if (accessToken == await _userManager.GetAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken"))
+            if (editUserRequest.gender != null)
             {
+                user.gender = editUserRequest.gender;
+            }
+            if (editUserRequest.email != null)
+            {
+                user.Email = editUserRequest.email;
+            }
+            if (editUserRequest.nationality != null)
+            {
+                user.nationality = editUserRequest.nationality;
+            }
 
-                if (editUserRequest.gender != null)
-                {
-                    user.gender = editUserRequest.gender;
-                }
-                if (editUserRequest.email != null)
-                {
-                    user.Email = editUserRequest.email;
-                }
-                if (editUserRequest.nationality != null)
-                {
-                    user.nationality = editUserRequest.nationality;
-                }
+            if (editUserRequest.birthDate != null)
+            {
+                user.birthDate = editUserRequest.birthDate;
+            }
 
-                if (editUserRequest.birthDate != null)
-                {
-                    user.birthDate = editUserRequest.birthDate;
-                }
+            if (editUserRequest.phone != null)
+            {
+                user.PhoneNumber = editUserRequest.phone;
+            }
 
-                if (editUserRequest.phone != null)
-                {
-                    user.PhoneNumber = editUserRequest.phone;
-                }
+            if (editUserRequest.fullName != null)
+            {
+                user.fullName = editUserRequest.fullName;
+            }
 
-                if (editUserRequest.fullName != null)
-                {
-                    user.fullName = editUserRequest.fullName;
-                }
+            await _userManager.UpdateAsync(user);
 
-                await _userManager.UpdateAsync(user);
+            var rabbit = RabbitHutch.CreateBus("host=localhost");
+            await rabbit.PubSub.PublishAsync(user);
 
+            return new OkObjectResult("");
+        }
+
+        public async Task<IActionResult> SetRolesToUser(string userId, List<string> roles, string adminUserId)
+        {
+            User user = await _userManager.FindByIdAsync(userId);
+
+            string message = "Вам выдали новые роли: ";
+            foreach (string role in roles)
+            {
+                await _userManager.AddToRoleAsync(user, role); //"ABITURIENT"
+                message += role + ", ";
+            }
+
+            Notification notification = new Notification(user.Email, message.Substring(0, message.Length - 2), "Новая роль - новые обязанности");
+            var rabbit = RabbitHutch.CreateBus("host=localhost");
+            await rabbit.PubSub.PublishAsync(notification);
+
+            return new OkObjectResult("");
+        }
+
+        public async Task<IActionResult> SetNewPassword(string userId, ChangePasswordRequest changePasswordRequest)
+        {
+            User user = await _userManager.FindByIdAsync(userId);
+
+            if (await _userManager.CheckPasswordAsync(user, changePasswordRequest.password))
+            {
+                await _userManager.ChangePasswordAsync(user, changePasswordRequest.password, changePasswordRequest.newPassword);
                 return new OkObjectResult("");
             }
-            else return new UnauthorizedObjectResult("");
-        }
-
-        public async Task<IActionResult> SetRolesToUser(string userId, List<string> roles, string accessToken, string adminUserId)
-        {
-            User user = await _userManager.FindByIdAsync(userId);
-
-            if (accessToken == await _userManager.GetAuthenticationTokenAsync(await _userManager.FindByIdAsync(adminUserId), "Abiturient.tsu", "AccessToken"))
-            {
-                string message = "Вам выдали новые роли: ";
-                foreach (string role in roles)
-                {
-                    await _userManager.AddToRoleAsync(user, role); //"ABITURIENT"
-                    message += role + ", ";
-                }
-
-                Notification notification = new Notification(user.Email, message.Substring(0, message.Length - 2), "Новая роль - новые обязанности");
-                var rabbit = RabbitHutch.CreateBus("host=localhost");
-                await rabbit.PubSub.PublishAsync(notification);
-
-                return new OkObjectResult("");
-
-            }
-            else return new UnauthorizedObjectResult("");
-        }
-
-        public async Task<IActionResult> SetNewPassword(string userId, string accessToken, ChangePasswordRequest changePasswordRequest)
-        {
-            User user = await _userManager.FindByIdAsync(userId);
-
-            if (accessToken == await _userManager.GetAuthenticationTokenAsync(user, "Abiturient.tsu", "AccessToken"))
-            {
-                if (await _userManager.CheckPasswordAsync(user, changePasswordRequest.password))
-                {
-                    await _userManager.ChangePasswordAsync(user, changePasswordRequest.password, changePasswordRequest.newPassword);
-                    return new OkObjectResult("");
-                }
-                else return new BadRequestObjectResult(new ErrorResponse(400, "Неправильный пароль"));
-            }
-            else return new UnauthorizedObjectResult("");
+            else return new BadRequestObjectResult(new ErrorResponse(400, "Неправильный пароль"));
         }
     }
 }
