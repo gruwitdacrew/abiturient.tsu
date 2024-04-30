@@ -1,0 +1,75 @@
+.container {
+    display: grid;
+    place-items: center;
+    height: 90vh;
+    min-width: min-content;
+}
+
+.form {
+
+    width: fit-content;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+
+    border: 2px solid black;
+    border-radius: 20px;
+
+    padding: 20px;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    margin : 10px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    flex-direction : row;
+    margin : 10px;
+}
+
+.text {
+    font : 600;
+    font-size: 25px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.navLink {
+    display: inline-block; 
+    flex: 1;
+    text-align: center;
+}
+
+.navBar {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    align-content: space-around;
+}
+
+.submit {
+    background-color: blueviolet;
+    color: white;
+    padding:5px;
+    border-color: white;
+    border-radius: 20px;
+
+    margin-top: 20px;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+input {
+    color:grey;
+    border-radius: 10px;
+    background-color: rgb(255, 255, 255);
+    outline: none; /* Убираем обводку при выделении */
+}
+
+input:focus {
+  border-color: rgb(79, 79, 79); /* Изменяем цвет обводки при выделении */
+}
