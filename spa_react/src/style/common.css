@@ -39,9 +39,14 @@
 }
 
 .navLink {
+    color: white;
+    text-decoration: none;
+    background-color: blueviolet;
+    padding: 5px;
     display: inline-block; 
     flex: 1;
     text-align: center;
+    border: 5px solid black;
 }
 
 .navBar {

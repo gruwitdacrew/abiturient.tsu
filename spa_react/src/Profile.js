@@ -1,6 +1,33 @@
 import React, { Component } from "react";
+import './style/common.css';
 
 class Profile extends Component {
+  componentDidMount() {
+    // Выполнение запроса при загрузке страницы
+    fetch(window.server + "/api/users/profile", {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status !== 500) return response.json();
+    })
+    .then(data => {
+      if (data.statusCode !== null) {
+        alert(data.message);
+      }
+      else{
+        document.getElementById("email").value = data.email;
+        document.getElementById("phone").value = data.phone;
+        document.getElementById("fullName").value = data.fullName
+        document.getElementById("birthDate").value = data.birthDate
+        document.getElementById("gender").value = data.gender
+        document.getElementById("nationality").value = data.nationality
+        document.getElementById("role").value = data.roles.join(" | ");
+      }
+    });
+  }
   render() {
     return (
       <div class = "container">

@@ -1,38 +1,39 @@
 import React, { Component } from "react";
 import Documents from "./Documents";
+import './style/common.css';
+
 
 class Login extends Component {
-  handleLogin = async () => {
-    try {
-      const response = await fetch('https://your-authentication-endpoint', {
+  login = async () => {
+      fetch(window.server + "/api/users/login", {
         method: 'POST',
-        body: JSON.stringify({ username: 'example', password: 'example' }),
+        body: JSON.stringify({ email: document.getElementById("email").value, password: document.getElementById("password").value}),
         headers: {
           'Content-Type': 'application/json'
         }
+      })
+      .then(response => {
+        if (response.status !== 500) return response.json();
+      })
+      .then(data => {
+        if (data.statusCode !== null) {
+          alert(data.message);
+        }
+        else{
+          localStorage.setItem("accessToken", data.accessToken);
+          localStorage.setItem("refreshToken", data.refreshToken);
+    
+          this.props.setAuthenticated(true);
+          this.setState({ redirectToDocuments: true });
+        }
       });
-
-      if (response.ok)
-      {
-        this.props.setIsAuthenticated(true);
-        this.setState({ redirectToDocuments: true });
-      }
-      else
-      {
-        console.error('Authentication failed');
-      }
-    }
-    catch (error)
-    {
-      console.error('Error:', error);
-    }
   };
 
   render() {
 
-    if (this.state.redirectToDocuments) {
+    if (this.state && this.state.redirectToDocuments) {
       return <Documents />;
-    }
+  }
 
     return (
       <div class = "container">
@@ -52,7 +53,7 @@ class Login extends Component {
             <input class = "text" type="password" id="password" />
           </div>
           
-          <button type="submit" class="submit text" onClick={this.handleLogin}>OK</button>
+          <button type="submit" class="submit text" onClick={this.login}>OK</button>
         </form>
         
       </div>
