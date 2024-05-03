@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import './style/common.css';
+import Login from "./Login";
+import Documents from "./Documents";
 
 class Profile extends Component {
   componentDidMount() {
@@ -11,10 +13,18 @@ class Profile extends Component {
       }
     })
     .then(response => {
-      if (response.status !== 500) return response.json();
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.componentDidMount()});
+        return;
+      }
+      else if (response.status !== 500) return response.json();
     })
     .then(data => {
-      if (data.statusCode !== null) {
+      if (!data) {
+        return;
+      }
+      if (data.statusCode) {
         alert(data.message);
       }
       else{
@@ -28,7 +38,17 @@ class Profile extends Component {
       }
     });
   }
+
   render() {
+
+    if (this.state && this.state.redirectToLogin) {
+      return <Login />;
+  }
+
+    if (this.state && this.state.redirectToDocuments) {
+      return <Documents />;
+  }
+
     return (
       <div class = "container">
 

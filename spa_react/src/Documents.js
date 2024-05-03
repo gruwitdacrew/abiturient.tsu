@@ -9,10 +9,10 @@ class Documents extends Component {
           <form id="passport" class = "form">
             <div id="alert"></div>
 
-            <label class = "text" style={{fontSize: '50px', textAlign: "center"}}>Login</label>
+            <label class = "text" style={{fontSize: '50px', textAlign: "center"}}>Документ об образовании</label>
 
             <div class="form-column">
-              <label class = "text" for="email">Email</label>
+              <label class = "text" for="education">Email</label>
               <input class = "text" type="email" id="email" />
             </div>
 
@@ -27,7 +27,7 @@ class Documents extends Component {
           <form id="education" class = "form">
             <div id="alert"></div>
 
-            <label class = "text" style={{fontSize: '50px', textAlign: "center"}}>Login</label>
+            <label class = "text" style={{fontSize: '50px', textAlign: "center"}}>Паспорт</label>
 
             <div class="form-column">
               <label class = "text" for="email">Email</label>

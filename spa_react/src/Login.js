@@ -1,11 +1,16 @@
 import React, { Component } from "react";
 import Documents from "./Documents";
 import './style/common.css';
+import Register from "./Register";
 
 
 class Login extends Component {
   login = async () => {
-      fetch(window.server + "/api/users/login", {
+      if (document.getElementById("email").value === "" || document.getElementById("password").value === "")
+      {
+        alert("Заполните все поля");
+      }
+      else fetch(window.server + "/api/users/login", {
         method: 'POST',
         body: JSON.stringify({ email: document.getElementById("email").value, password: document.getElementById("password").value}),
         headers: {
@@ -16,7 +21,7 @@ class Login extends Component {
         if (response.status !== 500) return response.json();
       })
       .then(data => {
-        if (data.statusCode !== null) {
+        if (data.statusCode) {
           alert(data.message);
         }
         else{
@@ -28,11 +33,19 @@ class Login extends Component {
         }
       });
   };
+  toRegister = async () => {
+    this.setState({ redirectToRegister: true });
+  };
+
 
   render() {
 
     if (this.state && this.state.redirectToDocuments) {
       return <Documents />;
+  }
+
+    if (this.state && this.state.redirectToRegister) {
+      return <Register />;
   }
 
     return (
@@ -52,6 +65,8 @@ class Login extends Component {
             <label class = "text" for="password">Password</label>
             <input class = "text" type="password" id="password" />
           </div>
+
+          <a href="#/register" onClick={this.toRegister}>Регистрация</a>
           
           <button type="submit" class="submit text" onClick={this.login}>OK</button>
         </form>
