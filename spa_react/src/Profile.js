@@ -52,14 +52,14 @@ class Profile extends Component {
         this.props.refresh(() => {this.logout()});
         return;
       }
-      else if (response.status === 200) return response.json();
+      else if (response.status === 200) return;
     })
     .then(data => {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
 
-      this.props.setState({redirectToLogin: true})
-      this.setAuthenticated(false);
+      this.props.setAuthenticated(false);
+      this.setState({redirectToLogin: true})
     });
   }
 
