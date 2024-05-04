@@ -13,7 +13,7 @@ class Register extends Component {
     {
       alert("Пароли не совпадают");
     }
-    else fetch(window.server + "/api/users/register", {
+    else fetch(window.users + "/api/users/register", {
       method: 'POST',
       body: JSON.stringify({  email: document.getElementById("email").value,
                               phone: document.getElementById("phone").value,

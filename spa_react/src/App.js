@@ -6,7 +6,8 @@ import Profile from "./Profile";
 import Documents from "./Documents";
 import Register from "./Register";
 
-window.server = "https://localhost:7273";
+window.users = "https://localhost:7273";
+window.documents = "https://localhost:7275";
 
 class App extends React.Component {
   constructor(props) {
@@ -17,7 +18,7 @@ class App extends React.Component {
   }
 
   refresh = async (func) => {
-    fetch(window.server + "/api/users/refresh", {
+    fetch(window.users + "/api/users/refresh", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +69,7 @@ class App extends React.Component {
           <Routes>
             <Route exact path="/" element={this.state.isAuthenticated ? <Profile refresh={this.refresh} setAuthenticated={this.setAuthenticated} /> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
             <Route exact path="/profile" element={this.state.isAuthenticated ? <Profile refresh={this.refresh} setAuthenticated={this.setAuthenticated}/> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
-            <Route exact path="/documents" element={this.state.isAuthenticated ? <Documents /> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
+            <Route exact path="/documents" element={this.state.isAuthenticated ? <Documents refresh={this.refresh} /> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
             <Route exact path="/register" element=<Register setAuthenticated={this.setAuthenticated}/>></Route>
             <Route exact path="/login" element=<Login setAuthenticated={this.setAuthenticated}/>></Route>
           </Routes>

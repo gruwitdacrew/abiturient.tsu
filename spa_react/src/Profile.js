@@ -6,7 +6,7 @@ import Documents from "./Documents";
 class Profile extends Component {
   componentDidMount() {
     // Выполнение запроса при загрузке страницы
-    fetch(window.server + "/api/users/profile", {
+    fetch(window.users + "/api/users/profile", {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
@@ -39,8 +39,42 @@ class Profile extends Component {
     });
   }
 
+  edit = async() => {
+    fetch(window.users + "/api/users/profile", {
+      method: 'PATCH',
+      body: JSON.stringify({  email: document.getElementById("email").value || undefined,
+                              phone: document.getElementById("phone").value || undefined,
+                              fullName: document.getElementById("fullName").value || undefined,
+                              birthDate: document.getElementById("birthDate").value || undefined,
+                              gender: document.getElementById("gender").value || undefined,
+                              nationality: document.getElementById("nationality").value || undefined,
+                           }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.edit()});
+        return;
+      }
+      else if (response.status !== 200) return response.json();
+      else return;
+    })
+    .then(data => {
+      if (!data) {
+        return;
+      }
+      if (data.statusCode) {
+        alert(data.message);
+      }
+    });
+  }
+
   logout = async() => {
-    fetch(window.server + "/api/users/logout", {
+    fetch(window.users + "/api/users/logout", {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
@@ -52,14 +86,44 @@ class Profile extends Component {
         this.props.refresh(() => {this.logout()});
         return;
       }
-      else if (response.status === 200) return;
+      else if (response.status !== 200) return response.json();
+      else return;
+    })
+    .then(() => {
+
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+  
+        this.props.setAuthenticated(false);
+        this.setState({redirectToLogin: true})
+    });
+  }
+
+  changePassword = async() => {
+    fetch(window.users + "/api/users/password", {
+      method: 'PUT',
+      body: JSON.stringify({ password: document.getElementById('passwordOld').value, newPassword: document.getElementById('passwordNew').value }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.changePassword()});
+        return;
+      }
+      else if (response.status !== 200) return response.json();
+      else return;
     })
     .then(data => {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-
-      this.props.setAuthenticated(false);
-      this.setState({redirectToLogin: true})
+      if (!data) {
+        return;
+      }
+      if (data.statusCode) {
+        alert(data.message);
+      }
     });
   }
 
@@ -75,6 +139,8 @@ class Profile extends Component {
 
     return (
       <div class = "container">
+
+        <button type="submit" class="submit text" style={{backgroundColor: "red"}} onClick={this.logout}>Выйти</button>
 
         <form id="signup-form" class = "form">
           <div id="alert"></div>
@@ -122,10 +188,26 @@ class Profile extends Component {
           </div>
 
           
-          <button type="submit" class="submit text">OK</button>
+          <button type="submit" class="submit text" onClick={this.edit} >OK</button>
         </form>
 
-        <button type="submit" class="submit text" style={{backgroundColor: "red"}} onClick={this.logout}>Выйти</button>
+        <form id="login-form" class = "form">
+          <div id="alert"></div>
+
+          <label class = "text" style={{fontSize: '50px', textAlign: "center"}}>Password Change</label>
+
+          <div class="form-column">
+            <label class = "text" for="password">Password</label>
+            <input class = "text" type="password" id="passwordOld" />
+          </div>
+
+          <div class="form-column">
+            <label class = "text" for="password">New Password</label>
+            <input class = "text" type="password" id="passwordNew" />
+          </div>
+          
+          <button type="submit" class="submit text" onClick={this.changePassword}>OK</button>
+        </form>
         
       </div>
     );

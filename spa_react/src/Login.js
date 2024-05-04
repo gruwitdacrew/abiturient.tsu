@@ -10,7 +10,7 @@ class Login extends Component {
       {
         alert("Заполните все поля");
       }
-      else fetch(window.server + "/api/users/login", {
+      else fetch(window.users + "/api/users/login", {
         method: 'POST',
         body: JSON.stringify({ email: document.getElementById("email").value, password: document.getElementById("password").value}),
         headers: {
