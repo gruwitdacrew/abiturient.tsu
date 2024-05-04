@@ -60,7 +60,7 @@ namespace Users_Service.Controllers
             return await _usersService.Refresh(userId, refreshToken);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Абитуриент")]
         [HttpPost]
         [SwaggerResponse((int)HttpStatusCode.OK)]
         [SwaggerResponse((int)HttpStatusCode.Forbidden)]
@@ -84,7 +84,7 @@ namespace Users_Service.Controllers
             return await _usersService.GetUserProfile(userId);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Абитуриент")]
         [HttpPatch]
         [SwaggerResponse((int)HttpStatusCode.OK)]
         [SwaggerResponse((int)HttpStatusCode.Forbidden)]
@@ -104,7 +104,7 @@ namespace Users_Service.Controllers
             return await _usersService.EditUser(userId, editRequest);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Абитуриент")]
         [HttpPut]
         [SwaggerResponse((int)HttpStatusCode.OK)]
         [SwaggerResponse((int)HttpStatusCode.BadRequest)]

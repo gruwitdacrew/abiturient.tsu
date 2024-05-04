@@ -43,12 +43,18 @@
 .navLink {
     color: white;
     text-decoration: none;
-    background-color: blueviolet;
+    margin-left: 20px;
+    margin-right: 20px;
     padding: 5px;
     display: inline-block; 
     flex: 1;
     text-align: center;
-    border: 5px solid black;
+}
+
+.navButt
+{
+    padding: 0;
+    background-color: rgb(43, 86, 226);
 }
 
 .navBar {
@@ -56,6 +62,7 @@
     height: fit-content;
     display: flex;
     align-content: space-around;
+    background-color: rgb(58, 150, 255);
 }
 
 .submit {
@@ -65,6 +72,8 @@
     border-color: white;
     border-radius: 20px;
 
+    padding-left: 20px;
+    padding-right: 20px;
     margin-top: 20px;
     margin-left: 10%;
     margin-right: 10%;

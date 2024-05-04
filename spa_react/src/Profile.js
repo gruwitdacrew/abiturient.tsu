@@ -39,6 +39,30 @@ class Profile extends Component {
     });
   }
 
+  logout = async() => {
+    fetch(window.server + "/api/users/logout", {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.logout()});
+        return;
+      }
+      else if (response.status === 200) return response.json();
+    })
+    .then(data => {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+
+      this.props.setState({redirectToLogin: true})
+      this.setAuthenticated(false);
+    });
+  }
+
   render() {
 
     if (this.state && this.state.redirectToLogin) {
@@ -100,6 +124,8 @@ class Profile extends Component {
           
           <button type="submit" class="submit text">OK</button>
         </form>
+
+        <button type="submit" class="submit text" style={{backgroundColor: "red"}} onClick={this.logout}>Выйти</button>
         
       </div>
     );

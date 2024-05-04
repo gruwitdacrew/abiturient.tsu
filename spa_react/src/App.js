@@ -12,7 +12,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isAuthenticated: false
+      isAuthenticated: localStorage.getItem('refreshToken') !== null
     };
   }
 
@@ -27,7 +27,9 @@ class App extends React.Component {
     .then(response => {
       if (response.status === 401)
       {
-        this.setState({ redirectToLogin: true });
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        this.setAuthenticated(false);
         return;
       }
       if (response.status !== 500) return response.json();
@@ -57,13 +59,15 @@ class App extends React.Component {
     <HashRouter>
       <div className="App">
         <nav class="navBar text">
-          {this.state.isAuthenticated ? <a class="navLink text" href="#/profile">Профиль</a> : null}
-          {this.state.isAuthenticated ? <a class="navLink text" href="#/documents">Документы</a> : null }
+          <button class = "navButt"><a class="navLink text" href="#/">Abiturient.tsu</a></button>
+          <span style={{width: "90%"}}></span>
+          {this.state.isAuthenticated ? <button class = "navButt"><a class="navLink text" href="#/documents">Документы</a></button> : null }
+          {this.state.isAuthenticated ? <button class = "navButt"><a class="navLink text" href="#/profile">Профиль</a></button> : null}
         </nav>
         <div className="content">
           <Routes>
-            <Route exact path="/" element={this.state.isAuthenticated ? <Profile refresh={this.refresh} /> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
-            <Route exact path="/profile" element={this.state.isAuthenticated ? <Profile refresh={this.refresh} /> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
+            <Route exact path="/" element={this.state.isAuthenticated ? <Profile refresh={this.refresh} setAuthenticated={this.setAuthenticated} /> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
+            <Route exact path="/profile" element={this.state.isAuthenticated ? <Profile refresh={this.refresh} setAuthenticated={this.setAuthenticated}/> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
             <Route exact path="/documents" element={this.state.isAuthenticated ? <Documents /> : <Login setAuthenticated={this.setAuthenticated} />}></Route>
             <Route exact path="/register" element=<Register setAuthenticated={this.setAuthenticated}/>></Route>
             <Route exact path="/login" element=<Login setAuthenticated={this.setAuthenticated}/>></Route>
