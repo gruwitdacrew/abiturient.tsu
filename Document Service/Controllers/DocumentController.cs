@@ -24,6 +24,19 @@ namespace Document_Service.Controllers
         }
 
         [Authorize(Roles = "Абитуриент")]
+        [HttpGet]
+        [SwaggerResponse((int)HttpStatusCode.OK)]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest)]
+        [SwaggerResponse((int)HttpStatusCode.Conflict)]
+        [Route("/api/document/education/types")]
+        public async Task<ActionResult<EducationDocumentResponse>> getEducationDocumentTypes()
+        {
+            var userId = User.Claims.ToList()[0].Value;
+
+            return await _educationService.GetEducationDocumentTypes(userId);
+        }
+
+        [Authorize(Roles = "Абитуриент")]
         [HttpPost]
         [SwaggerResponse((int)HttpStatusCode.OK)]
         [SwaggerResponse((int)HttpStatusCode.BadRequest)]

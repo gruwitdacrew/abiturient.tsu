@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Document_Service.Models;
 using Document_Service.DBContext;
 using Microsoft.EntityFrameworkCore;
+using EasyNetQ;
 
 namespace Document_Service.Services
 {
@@ -13,6 +14,15 @@ namespace Document_Service.Services
         public Education(AppDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<ActionResult<EducationDocumentResponse>> GetEducationDocumentTypes(string userId)
+        {
+            using (var bus = RabbitHutch.CreateBus("host=localhost"))
+            {
+                List<string> response = await bus.Rpc.RequestAsync<string, List<string>>("");
+                return new OkObjectResult(response);
+            }
         }
 
         public async Task<IActionResult> AddEducationDocument(string userId, EducationDocumentRequest educationDocumentRequest)

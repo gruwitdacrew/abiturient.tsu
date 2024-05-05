@@ -36,6 +36,7 @@ class App extends React.Component {
       if (response.status !== 500) return response.json();
     })
     .then(data => {
+      if (!data) return;
       if (data.statusCode) {
         alert(data.message);
       }

@@ -81,6 +81,17 @@
     margin-right: 10%;
 }
 
+select {
+    border-radius: 10px;
+    background-color: rgb(255, 255, 255);
+    outline: none; /* Убираем обводку при выделении */
+    border-width: 2px;
+}
+
+select:focus {
+  border-color: rgb(79, 79, 79); /* Изменяем цвет обводки при выделении */
+}
+
 input {
     border-radius: 10px;
     background-color: rgb(255, 255, 255);
