@@ -8,6 +8,8 @@ namespace Document_Service.Models
         public string date { get; set; }
         public string grade { get; set; }
 
+        public bool scan { get; set; }
+
         public EducationDocumentResponse()
         {
 
@@ -18,6 +20,7 @@ namespace Document_Service.Models
             number = educationDocument.number;
             date = educationDocument.date;
             grade = educationDocument.grade;
+            scan = educationDocument.scan != null;
         }
 
     }

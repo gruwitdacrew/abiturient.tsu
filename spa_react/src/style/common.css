@@ -85,7 +85,7 @@ select {
     border-radius: 10px;
     background-color: rgb(255, 255, 255);
     outline: none; /* Убираем обводку при выделении */
-    border-width: 2px;
+    border: 3px solid black;
 }
 
 select:focus {
@@ -93,10 +93,13 @@ select:focus {
 }
 
 input {
+    border: 3px solid black;
     border-radius: 10px;
     background-color: rgb(255, 255, 255);
     outline: none; /* Убираем обводку при выделении */
 }
+
+
 
 input:focus {
   border-color: rgb(79, 79, 79); /* Изменяем цвет обводки при выделении */

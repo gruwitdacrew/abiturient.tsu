@@ -42,6 +42,7 @@ class Documents extends Component {
       }
       else{
         document.getElementById('inputsEducation').style.display = "block";
+        if (data.scan) document.getElementById('scan_edu_exist').style.display = "block"; else document.getElementById('scan_edu').style.display = "block";
         document.getElementById('documentType').value = data.documentType;
         document.getElementById('number_edu').value = data.number;
         document.getElementById('date_edu').value = data.date;
@@ -214,6 +215,7 @@ class Documents extends Component {
   createEducationButton = async() =>
   {
     document.getElementById('inputsEducation').style.display = 'block';
+    document.getElementById('scan_edu').style.display = 'block';
     document.getElementById('createEducation').style.display = 'none';
     this.setState({ firstEducation: true });
   }
@@ -248,7 +250,9 @@ class Documents extends Component {
         alert(data.message);
       }
       else{
+        
         document.getElementById('inputsPassport').style.display = "block";
+        if (data.scan) document.getElementById('scan_pas_exist').style.display = "block"; else document.getElementById('scan_pas').style.display = "block";
         document.getElementById('number_pas').value = data.number;
         document.getElementById('date_pas').value = data.date;
         document.getElementById('series').value = data.series;
@@ -364,6 +368,8 @@ class Documents extends Component {
           alert(data.message);
         }
       });
+      this.uploadPassportScan();
+
     }
   }
   
@@ -371,8 +377,213 @@ class Documents extends Component {
   createPassportButton = async() =>
   {
     document.getElementById('inputsPassport').style.display = 'block';
+    document.getElementById('scan_pas').style.display = 'block';
     document.getElementById('createPassport').style.display = 'none';
     this.setState({ firstPassport: true });
+  }
+
+  downloadEducationScan = async() =>
+  {
+    return fetch(window.documents + "/api/document/education/scan", {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.downloadEducationScan()});
+        return;
+      }
+      if (response.status === 404)
+      {
+        return;
+      }
+      else if (response.status === 200) return response.blob();
+      else return response.json();
+    })
+    .then(data => {
+      if (!data)
+      {
+        return;
+      }
+      if (data.statusCode) {
+        alert(data.message);
+      }
+      else{
+        const url = window.URL.createObjectURL(data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'passport.pdf'); // Указываем имя файла для скачивания
+        document.body.appendChild(link);
+        link.click();
+      }
+      return;
+    });
+  }
+
+  deleteEducationScan = async() =>
+  {
+    return fetch(window.documents + "/api/document/education/scan", {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.deleteEducationScan()});
+        return;
+      }
+      else if (response.status !== 500) return response.json();
+    })
+    .then(data => {
+      if (!data)
+      {
+        document.getElementById('scan_edu_exist').style.display = "none";
+        document.getElementById('scan_edu').style.display = "block";
+        return;
+      }
+      if (data.statusCode) {
+        alert(data.message);
+      }
+      return;
+    });
+  }
+
+  downloadPassportScan = async() =>
+  {
+    return fetch(window.documents + "/api/document/passport/scan", {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.downloadPassportScan()});
+        return;
+      }
+      if (response.status === 404)
+      {
+        return;
+      }
+      else if (response.status === 200) return response.blob();
+      else return response.json();
+    })
+    .then(data => {
+      if (!data)
+      {
+        return;
+      }
+      if (data.statusCode) {
+        alert(data.message);
+      }
+      else{
+        const url = window.URL.createObjectURL(data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'passport.pdf'); // Указываем имя файла для скачивания
+        document.body.appendChild(link);
+        link.click();
+      }
+      return;
+    });
+  }
+
+  deletePassportScan = async() =>
+  {
+    return fetch(window.documents + "/api/document/passport/scan", {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.deletePassportScan()});
+        return;
+      }
+      else if (response.status !== 500) return response.json();
+    })
+    .then(data => {
+      if (!data)
+      {
+        document.getElementById('scan_pas_exist').style.display = "none";
+        document.getElementById('scan_pas').style.display = "block";
+        return;
+      }
+      if (data.statusCode) {
+        alert(data.message);
+      }
+      return;
+    });
+  }
+
+  uploadEducationScan = async() =>
+  {
+    return fetch(window.documents + "/api/document/education/scan", {
+      method: 'POST',
+      body: new FormData().append('file', document.getElementById('scan_edu').files[0]),
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.uploadEducationScan()});
+        return;
+      }
+      else if (response.status !== 500) return response.json();
+    })
+    .then(data => {
+      if (!data)
+      {
+        return;
+      }
+      if (data.statusCode) {
+        alert(data.message);
+      }
+      return;
+    });
+  }
+
+  uploadPassportScan = async() =>
+  {
+    const formData = new FormData();
+    formData.append('file', document.getElementById('scan_pas').files[0], document.getElementById('scan_pas').files[0].name); // Указываем 'file' в качестве имени поля
+
+    return fetch(window.documents + "/api/document/passport/scan", {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+      }
+    })
+    .then(response => {
+      if (response.status === 401)
+      {
+        this.props.refresh(() => {this.uploadPassportScan()});
+        return;
+      }
+      else if (response.status !== 500) return response.json();
+    })
+    .then(data => {
+      if (!data)
+      {
+        return;
+      }
+      if (data.statusCode) {
+        alert(data.message);
+      }
+      return;
+    });
   }
 
   render() {
@@ -405,6 +616,15 @@ class Documents extends Component {
                 <label class = "text" for="grade">Оценка</label>
                 <input class = "text" id="grade" />
               </div>
+
+              <div class="form-column">
+                <label class = "text" for="scan_edu">Скан</label>
+                <input type="file" class = "text" id="scan_edu" style={{display: "none"}} />
+                <div class="form-row" id ="scan_edu_exist" style={{display: "none"}}>
+                  <button type="submit" class="submit text" onClick={this.downloadEducationScan} style={{display: "none"}} >Скачать</button>
+                  <button type="submit" class="submit text" style={{backgroundColor:"red"}} onClick={this.deleteEducationScan}>Удалить</button>
+                </div>
+              </div>
               
               <div class="form-row">
                 <button type="submit" class="submit text" onClick={this.createOrEditEducation}>OK</button>
@@ -435,6 +655,16 @@ class Documents extends Component {
                 <label class = "text" for="date_pas">Дата выдачи</label>
                 <input class = "text" id="date_pas" />
               </div>
+
+              <div class="form-column">
+                <label class = "text" for="scan_pas">Скан</label>
+                <input type="file" class = "text" id="scan_pas" style={{display: "none"}} />
+                <div class="form-row" id ="scan_pas_exist" style={{display: "none"}}>
+                  <button type="submit" class="submit text" onClick={this.downloadPassportScan} >Скачать</button>
+                  <button type="submit" class="submit text" style={{backgroundColor:"red"}} onClick={this.deletePassportScan}>Удалить</button>
+                </div>
+              </div>
+              
 
 
               <div class="form-row">

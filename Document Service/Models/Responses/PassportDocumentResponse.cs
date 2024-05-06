@@ -7,6 +7,8 @@ namespace Document_Service.Models
         public string number { get; set; }
         public string date { get; set; }
 
+        public bool scan { get; set; }
+
         public PassportDocumentResponse()
         {
 
@@ -16,6 +18,7 @@ namespace Document_Service.Models
             this.series = passportDocument.series;
             this.number = passportDocument.number;
             this.date = passportDocument.date;
+            this.scan = passportDocument.scan!=null;
 
         }
 
