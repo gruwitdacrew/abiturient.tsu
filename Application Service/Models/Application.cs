@@ -13,6 +13,8 @@ namespace Application_Service.Models
         public string date_edu { get; set; }
         public string grade { get; set; }
 
+        public DateTime lastModified { get; set; }
+
 
         public static int applicationProgramsQuantity = 3;
         public Abiturient abiturient { get; set; }
@@ -33,6 +35,7 @@ namespace Application_Service.Models
             this.number_edu = educationDocument.number;
             this.date_edu = educationDocument.date;
             this.grade = educationDocument.grade;
+            this.lastModified = DateTime.UtcNow;
         }
     }
 }

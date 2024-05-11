@@ -25,6 +25,7 @@ namespace Application_Service
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<Abiturients>();
+            builder.Services.AddScoped<Managers>();
 
             AuthenticationConfiguration authenticationConfiguration = new AuthenticationConfiguration();
             builder.Configuration.Bind("Authentication", authenticationConfiguration);

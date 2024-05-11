@@ -1,13 +1,44 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Users_Service.Models;
+
 namespace Manager_Panel
 {
     public class Program
     {
+        public static string ServerAddress { get; set; } = "http://example.com";
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+
+                    AuthenticationConfiguration authenticationConfiguration = new AuthenticationConfiguration();
+                    builder.Configuration.Bind("Authentication", authenticationConfiguration);
+
+                    options.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationConfiguration.AccessTokenSecret)),
+                        ValidIssuer = authenticationConfiguration.Issuer,
+                        ValidAudience = authenticationConfiguration.Audience,
+                        ValidateIssuerSigningKey = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = true
+                    };
+                });
 
             var app = builder.Build();
 
@@ -24,11 +55,19 @@ namespace Manager_Panel
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Application}/{action=Applications}/{id?}");
+
+            app.MapControllerRoute(
+                name: "Login",
+                pattern: "{controller=Account}/{action=Login}");
+
+
 
             app.Run();
         }

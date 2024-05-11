@@ -1,0 +1,30 @@
+﻿@using EasyNetQ;
+@using System.Web;
+@using Users_Service.Models;
+@model Users_Service.Models.LoginRequest;
+
+<h2>Login</h2>
+
+@using (Html.BeginForm("Login", "Account", FormMethod.Post))
+{
+    <input type="email" name="email" placeholder="Email">
+    <input type="password" name="password" placeholder="Password">
+    <button type="submit">Log in</button>
+}
+
+<script>
+    var accessToken = '@TempData["AccessToken"]';
+    var refreshToken = '@TempData["RefreshToken"]';
+
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+</script>
+
+<script>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <text>
+            alert('@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["ErrorMessage"].ToString()))');
+        </text>
+    }
+</script>

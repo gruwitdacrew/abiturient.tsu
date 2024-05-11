@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -79,12 +80,16 @@ namespace Users_Service
                     };
                 });
 
+            builder.Services.AddSingleton<RabbitMQService>();
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 db.Database.Migrate();
+
+                var rabbit = app.Services.GetRequiredService<RabbitMQService>();
+                rabbit = new RabbitMQService(app.Services);
             }
 
             // Configure the HTTP request pipeline.

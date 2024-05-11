@@ -42,7 +42,7 @@ namespace Users_Service.Controllers
         [SwaggerResponse((int)HttpStatusCode.OK)]
         [SwaggerResponse((int)HttpStatusCode.Forbidden)]
         [SwaggerResponse((int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<TokenResponse>> login([FromBody] LoginRequest loginRequest)
+        public async Task<IActionResult> login([FromBody] LoginRequest loginRequest)
         {
             return await _usersService.LoginUser(loginRequest);
         }

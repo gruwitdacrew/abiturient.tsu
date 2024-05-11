@@ -54,7 +54,7 @@ namespace Users_Service.Services
             return new OkObjectResult(new TokenResponse(refreshToken, accessToken));
         }
 
-        public async Task<ActionResult<TokenResponse>> LoginUser(LoginRequest loginRequest)
+        public async Task<IActionResult> LoginUser(LoginRequest loginRequest)
         {
             User user = await _userManager.FindByEmailAsync(loginRequest.email);
 

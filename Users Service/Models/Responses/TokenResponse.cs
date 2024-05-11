@@ -5,6 +5,11 @@
         public string refreshToken { get; set; }
         public string accessToken { get; set; }
 
+        public TokenResponse()
+        {
+
+        }
+
         public TokenResponse(string refreshToken, string accessToken)
         {
             this.refreshToken = refreshToken;

@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Users_Service.Models;
-using Users_Service.Services;
 
 namespace Faculty_Service
 {

@@ -23,10 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Manager Component\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Document Service\Document Service.csproj" />
   </ItemGroup>
 
