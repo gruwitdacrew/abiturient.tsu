@@ -1,13 +1,16 @@
-﻿using Faculty_Service.DBContext;
+﻿using EasyNetQ;
+using Faculty_Service.DBContext;
 using Faculty_Service.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Newtonsoft.Json;
+using Notification_Service.Models;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Xml.Linq;
 
 namespace Faculty_Service.Services.Faculty_Component
 {
@@ -150,17 +153,23 @@ namespace Faculty_Service.Services.Faculty_Component
             if (response.IsSuccessStatusCode)
             {
                 List<EducationProgramRaw> programsRaw = JsonConvert.DeserializeObject<EducationPrograms>(await response.Content.ReadAsStringAsync()).programs;
+
                 List<EducationProgram> programs = new List<EducationProgram>();
+                List<EducationProgramPlain> programsPlain = new List<EducationProgramPlain>();//Программы упрощенного вида, будут отправлены в Application Service
 
                 foreach (var programRaw in programsRaw)
                 {
                     programs.Add(new EducationProgram(programRaw));
+                    programsPlain.Add(new EducationProgramPlain{ id = programRaw.id, faculty_name = programRaw.faculty.name, code = programRaw.code, name = programRaw.name });
                 }
 
                 List<EducationProgram> programsOld = await _context.Programs.ToListAsync();
 
                 _context.Programs.RemoveRange(programsOld.Except(programs, new EducationProgramComparer()));
                 _context.Programs.AddRange(programs.Except(programsOld, new EducationProgramComparer()));
+
+                var rabbit = RabbitHutch.CreateBus("host=localhost");
+                await rabbit.PubSub.PublishAsync(programsPlain);
             }
             else return new UnauthorizedObjectResult(string.Empty);
 
