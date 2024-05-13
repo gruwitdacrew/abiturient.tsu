@@ -32,13 +32,14 @@ namespace Manager_Panel.Controllers
 
                     ViewBag.AccessToken = tokenResponse.accessToken;
                     ViewBag.RefreshToken = tokenResponse.refreshToken;
+                    ViewBag.Message = "Привет, мир!";
 
-                    return RedirectToAction("Index", "Home"); // Перенаправление на другую страницу после успешного входа
+                    return RedirectToAction("Applications", "Application");
                 }
                 else if (response is ObjectResult objectResult)
                 {
                     var errorResponse = (ErrorResponse)objectResult.Value;
-                    TempData["ErrorMessage"] = errorResponse.message;
+                    ViewBag.ErrorMessage = errorResponse.message;
                     return RedirectToAction("Login", "Account"); // Перенаправление на другую страницу после успешного входа;
                 }
                 return RedirectToAction("Login", "Account");

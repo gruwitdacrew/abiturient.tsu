@@ -13,18 +13,10 @@
 }
 
 <script>
-    var accessToken = '@TempData["AccessToken"]';
-    var refreshToken = '@TempData["RefreshToken"]';
-
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-</script>
-
-<script>
-    @if (TempData["ErrorMessage"] != null)
+    @if (ViewBag.ErrorMessage != null)
     {
         <text>
-            alert('@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["ErrorMessage"].ToString()))');
+            alert('@Html.Raw(HttpUtility.JavaScriptStringEncode(ViewBag.ErrorMessage.ToString()))');
         </text>
     }
 </script>

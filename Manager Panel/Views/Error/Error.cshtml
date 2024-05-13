@@ -1,0 +1,13 @@
+﻿@using Application_Service.Models;
+@model ErrorResponse
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h1 class="text-danger">Error</h1>
+
+<div>
+    <h2 class="text-danger">An error occurred while processing your request.</h2>
+    <h3>StatusCode: @Model.statusCode</h3>
+    <p>@Model.message</p>
+</div>

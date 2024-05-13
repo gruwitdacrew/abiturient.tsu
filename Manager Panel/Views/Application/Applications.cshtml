@@ -1,8 +1,47 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Applications";
 }
+@using System.Web;
+@using Application_Service.Models;
+@model Application_Service.Models.ApplicationsResponse;
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список заявлений абитуриентов</title>
+</head>
+<body>
+    <h1>Список заявлений абитуриентов</h1>
+    <table>
+        <tr>
+            <th>Email</th>
+            <th>ФИО</th>
+            <th>Статус</th>
+            <th>Последнее изменение</th>
+        </tr>
+        @foreach (var admission in Model.applications)
+        {
+            <tr>
+                <td>@admission.email</td>
+                <td>@admission.fullName</td>
+                <td>@admission.status</td>
+                <td>@admission.lastModified</td>
+            </tr>
+        }
+    </table>
+</body>
+</html>
+
+<script>
+    localStorage.setItem('accessToken', ViewBag.AccessToken);
+    localStorage.setItem('refreshToken', ViewBag.RefreshToken);
+</script>
+
+<script>
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <text>
+            alert('@Html.Raw(HttpUtility.JavaScriptStringEncode(ViewBag.ErrorMessage.ToString()))');
+        </text>
+    }
+</script>

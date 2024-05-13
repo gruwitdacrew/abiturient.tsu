@@ -2,7 +2,7 @@
 using Application_Service.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
+using Application_Service.Models.Requests;
 
 namespace Application_Service.Services.Abiturient_Component
 {
@@ -14,49 +14,50 @@ namespace Application_Service.Services.Abiturient_Component
             _context = context;
         }
 
-        public async Task<IActionResult> GetApplications(string fullName,
-                                                             string[]? faculty_names,
-                                                             string status,
-                                                             string program_name,
-                                                             string hasManager,
-                                                             string myAbiturients,
-                                                             string lastModified,
-                                                             int page_current,
-                                                             int page_size)
+        public async Task<IActionResult> GetApplications(ApplicationsRequest applicationRequest)
         {
-            if (page_current < 1 || page_size < 1) return new BadRequestObjectResult(new ErrorResponse(400, "Page_current и page_size должны быть положительными числами"));
+            if (applicationRequest.page_current < 1 || applicationRequest.page_size < 1) return new ObjectResult(new ErrorResponse(400, "Page_current и page_size должны быть положительными числами"));
 
             var query = _context.Applications.AsQueryable();
 
-            if (faculty_names.Any() && faculty_names[0] != null)
+            if (applicationRequest.faculty_names != null && applicationRequest.faculty_names.Any() && applicationRequest.faculty_names[0] != null)
             {
-                var applicationIds = _context.ApplicationPrograms.Where(x => faculty_names.ToList().Contains(x.educationProgram.name)).Select(x => x.id);
+                //var applicationIds = await _context.ApplicationPrograms.Where(x => faculty_names.ToList().Contains(x.educationProgram.name)).Select(x => x.id).ToListAsync();
 
-                query = query.Where(x => _context.Applications.Where(x => applicationIds.ToList().Contains(x.id)));
+                query = query.Where(x => _context.ApplicationPrograms.Where(x => applicationRequest.faculty_names.ToList().Contains(x.educationProgram.name)).Select(x => x.id).ToList().Contains(x.id));
             }
 
-            if (fullName != null)
+            if (applicationRequest.fullName != null)
             {
-                query = query.Where(x => x.abiturient.fullName.Contains(fullName));
+                query = query.Where(x => x.abiturient.fullName.Contains(applicationRequest.fullName));
             }
 
-            if (education_language != null)
+            if (applicationRequest.status != null)
             {
-                query = query.Where(x => x.language == education_language);
+                query = query.Where(x => x.status == applicationRequest.status);
             }
 
-            if (program_name != null)
+            query = query.Where(x => (x.abiturient.managerId != null) == applicationRequest.hasManager);
+
+            query = query.Where(x => (x.abiturient.managerId == applicationRequest.managerId) == applicationRequest.myAbiturients);
+
+            if (applicationRequest.lastModifiedAsc) query = query.OrderBy(x => x.lastModified);
+            else query = query.OrderByDescending(x => x.lastModified);
+
+            if (applicationRequest.program_name != null)
             {
-                query = query.Where(x => x.StartsWith(program_name));
+                //admissions.Where(admission => admission.Programs.Any(program => program.Name == targetProgramName)).ToList();
+
+                query = query.Where(x => x.applicationPrograms.Any(program => program.educationProgram.name == applicationRequest.program_name));
             }
 
-            int count = (int)Math.Ceiling((double)await query.CountAsync() / page_size);
-            if (page_current > count) { return new BadRequestObjectResult(new ErrorResponse(400, "Page_current не может быть больше количества страниц")); }
+            int count = (int)Math.Ceiling((double)await query.CountAsync() / applicationRequest.page_size);
+            if (applicationRequest.page_current > count) { return new ObjectResult(new ErrorResponse(400, "Page_current не может быть больше количества страниц")); }
 
-            var programs = await query.Join(_context.Levels, program => program.levelId, level => level.id, (program, level) => new { EducationPrograms = program, Levels = level }).Join(_context.Faculties, programAndLevels => programAndLevels.EducationPrograms.facultyId, faculty => faculty.id, (program, faculty) => new EducationProgramResponse(program.EducationPrograms, faculty.name, program.Levels.name)).Skip((page_current - 1) * page_size).Take(page_size).ToListAsync();
+            var applications = await query.Skip((applicationRequest.page_current - 1) * applicationRequest.page_size).Take(applicationRequest.page_size).ToListAsync();
 
 
-            return new OkObjectResult(new ProgramsResponse(programs, new Pagination(page_size, count, page_current)));
+            return new OkObjectResult(new ApplicationsResponse(applications.Select(t => new ApplicationResponse(t)).ToList(), new Pagination(applicationRequest.page_size, count, applicationRequest.page_current)));
         }
     }
 }
